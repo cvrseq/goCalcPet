@@ -18,6 +18,7 @@ func createHandler(w http.ResponseWriter, r *http.Request) {
 
 	if err := json.NewDecoder(r.Body).Decode(&rq); err != nil {
 		fmt.Printf("%v", "Error not decode from Body to reqBody struct")
+		return
 	}
 
 	//if r.Method != r.PostFormValue(task) {
