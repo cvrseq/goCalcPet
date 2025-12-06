@@ -39,6 +39,8 @@ func main() {
 	mux := http.NewServeMux()
 
 	mux.HandleFunc("/endpoint", createHandler)
+	// how use POST
+	// curl -d '{ "task": "Hello" }' -H "Content-Type: application/json" -X POST http://localhost:8080/endpoint
 
 	fmt.Println("Server is working...")
 	fmt.Println("http://localhost:8080/endpoint")
