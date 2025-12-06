@@ -21,10 +21,6 @@ func createHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	//if r.Method != r.PostFormValue(task) {
-	//	fmt.Printf("%v, \n", http.StatusBadRequest)
-	//}
-
 	fmt.Println("successful decode")
 
 	task = rq.Task
@@ -36,12 +32,23 @@ func createHandler(w http.ResponseWriter, r *http.Request) {
 
 }
 
+func getHandlers(w http.ResponseWriter, r *http.Request) {
+
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(map[string]string{"hello": task})
+
+}
+
 func main() {
 	mux := http.NewServeMux()
 
 	mux.HandleFunc("/endpoint", createHandler)
 	// how use POST
-	// curl -d '{ "task": "Hello" }' -H "Content-Type: application/json" -X POST http://localhost:8080/endpoint
+	// curl -d '{ "task": "Go dev" }' -H "Content-Type: application/json" -X POST http://localhost:8080/endpoint
+
+	mux.HandleFunc("/endpoints", getHandlers)
+	// how use GET
+	// curl http://localhost:8080/endpoints
 
 	fmt.Println("Server is working...")
 	fmt.Println("http://localhost:8080/endpoint")
