@@ -42,16 +42,16 @@ func getHandlers(w http.ResponseWriter, r *http.Request) {
 func main() {
 	mux := http.NewServeMux()
 
-	mux.HandleFunc("POST /endpoints", createHandler)
+	mux.HandleFunc("POST /users", createHandler)
 	// how use POST
-	// curl -d '{ "task": "Go dev" }' -H "Content-Type: application/json" -X POST http://localhost:8080/endpoint
+	// curl -d '{ "task": "Go dev" }' -H "Content-Type: application/json" -X POST http://localhost:8080/users
 
-	mux.HandleFunc("GET /endpoints", getHandlers)
+	mux.HandleFunc("GET /users", getHandlers)
 	// how use GET
-	// curl http://localhost:8080/endpoints
+	// curl http://localhost:8080/users
 
 	fmt.Println("Server is working...")
-	fmt.Println("http://localhost:8080/endpoints")
+	fmt.Println("http://localhost:8080/users")
 	log.Fatal(http.ListenAndServe(":8080", mux))
 
 }
