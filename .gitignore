@@ -1,3 +1,5 @@
 .idea/
 
-LICENSE/
+LICENSE
+.DS_Store
+.env
