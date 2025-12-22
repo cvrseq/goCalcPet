@@ -91,24 +91,24 @@ func deleteHandler(w http.ResponseWriter, r *http.Request) {
 func main() {
 	router := http.NewServeMux()
 
-	router.HandleFunc("POST /users", createHandler)
+	router.HandleFunc("POST /tasks", createHandler)
 	// how use POST
-	// curl -d '{ "task": "Go dev" }' -H "Content-Type: application/json" -X POST http://localhost:8080/users
+	// curl -d '{ "task": "Go dev" }' -H "Content-Type: application/json" -X POST http://localhost:8080/tasks
 
-	router.HandleFunc("GET /users", getHandlers)
+	router.HandleFunc("GET /tasks", getHandlers)
 	// how use GET
-	// curl http://localhost:8080/users
+	// curl http://localhost:8080/tasks
 
-	router.HandleFunc("PATCH /users/{id}", updateHandler)
+	router.HandleFunc("PATCH /tasks/{id}", updateHandler)
 	//how use PATCH
-	// curl -X PATCH http://localhost:8080/users/{id} -H "Content-Type: application/json" -d '{"task": "rust developer"}'
+	// curl -X PATCH http://localhost:8080/tasks/{id} -H "Content-Type: application/json" -d '{"task": "rust developer"}'
 
-	router.HandleFunc("DELETE /users/{id}", deleteHandler)
+	router.HandleFunc("DELETE /tasks/{id}", deleteHandler)
 	//how use DELETE
-	// curl -X DELETE http://localhost:8080/users/{id}
+	// curl -X DELETE http://localhost:8080/tasks/{id}
 
 	fmt.Println("Server is working...")
-	fmt.Println("http://localhost:8080/users")
+	fmt.Println("http://localhost:8080/tasks")
 	log.Fatal(http.ListenAndServe(":8080", router))
 
 }
