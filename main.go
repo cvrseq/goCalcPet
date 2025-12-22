@@ -16,9 +16,8 @@ var task string
 
 func createHandler(w http.ResponseWriter, r *http.Request) {
 	var rq requestBody
-
 	if err := json.NewDecoder(r.Body).Decode(&rq); err != nil {
-		fmt.Printf("%v", "Error not decode from Body to reqBody struct")
+		log.Fatal(err)
 		return
 	}
 
@@ -28,29 +27,35 @@ func createHandler(w http.ResponseWriter, r *http.Request) {
 
 	fmt.Println("json data write in the task variable")
 
-	w.WriteHeader(http.StatusOK)
 	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(http.StatusCreated)
 
 }
 
 func getHandlers(w http.ResponseWriter, r *http.Request) {
 
 	w.Header().Set("Content-Type", "application/json")
-	json.NewEncoder(w).Encode(map[string]string{"hello": task})
+	w.WriteHeader(http.StatusOK)
 
+	if err := json.NewEncoder(w).Encode(task); err != nil {
+		log.Fatal(err)
+		return
+	}
 }
 
 func updateHandler(w http.ResponseWriter, r *http.Request) {
 	id := r.URL.Query().Get("id")
 
-	fmt.Fprintf(w, "%s", id)
+	if n, err := fmt.Fprintf(w, "%s", id); err != nil {
+		fmt.Println("not change var", n)
+	}
 
 	fmt.Println(id)
 
 	var rq requestBody
 
 	if err := json.NewDecoder(r.Body).Decode(&rq); err != nil {
-		fmt.Printf("%v", "error not decode from Body to reqBody struct")
+		log.Fatal(err)
 		return
 	}
 
@@ -60,8 +65,12 @@ func updateHandler(w http.ResponseWriter, r *http.Request) {
 
 	fmt.Println("json data update in the task variable")
 
-	w.WriteHeader(http.StatusOK)
 	w.Header().Set("Content-Type", "application/json")
+
+	if err := json.NewEncoder(w).Encode(task); err != nil {
+		log.Fatal(err)
+		return
+	}
 
 }
 
@@ -69,17 +78,13 @@ func deleteHandler(w http.ResponseWriter, r *http.Request) {
 	id := r.URL.Query().Get("id")
 	var rq requestBody
 
+	fmt.Println("successful decode in the delete")
+
 	if id == rq.ID {
-		task = " "
+		task = ""
 	}
 
-	if err := json.NewDecoder(r.Body).Decode(&rq); err != nil {
-		fmt.Printf("%v", "error not decode from Body to reqBody struct")
-		return
-	}
-
-	w.WriteHeader(http.StatusOK)
-	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(http.StatusNoContent)
 
 }
 
