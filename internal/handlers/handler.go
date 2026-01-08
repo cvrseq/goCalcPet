@@ -4,14 +4,15 @@ import (
 	"CRUD/internal/service"
 	"CRUD/internal/web/tasks"
 	"context"
-	"encoding/json"
 	"fmt"
-	"net/http"
-	"strconv"
 )
 
 type StatementHandler struct {
 	service service.StatementService
+}
+
+func NewTaskHandler(s service.StatementService) *StatementHandler {
+	return &StatementHandler{service: s}
 }
 
 func (h *StatementHandler) GetTasks(ctx context.Context, request tasks.GetTasksRequestObject) (tasks.GetTasksResponseObject, error) {
@@ -23,8 +24,11 @@ func (h *StatementHandler) GetTasks(ctx context.Context, request tasks.GetTasksR
 	response := tasks.GetTasks200JSONResponse{}
 
 	for _, tsk := range allTasks {
+
+		idVal := int(tsk.ID)
+
 		task := tasks.Task{
-			Id:     &tsk.ID,
+			Id:     &idVal,
 			IsDone: &tsk.IsDone,
 			Task:   &tsk.Task,
 		}
@@ -57,8 +61,10 @@ func (h *StatementHandler) PostTasks(ctx context.Context, request tasks.PostTask
 		return nil, err
 	}
 
+	crTsk := int(createdTask.ID)
+
 	response := tasks.PostTasks201JSONResponse{
-		Id:     &createdTask.ID,
+		Id:     &crTsk,
 		Task:   &createdTask.Task,
 		IsDone: &createdTask.IsDone,
 	}
@@ -66,8 +72,53 @@ func (h *StatementHandler) PostTasks(ctx context.Context, request tasks.PostTask
 	return response, nil
 }
 
-func NewTaskHandler(s service.StatementService) *StatementHandler {
-	return &StatementHandler{service: s}
+// /
+// / COMPLETE THIS METHOD
+// /
+func (h *StatementHandler) PatchTasksId(ctx context.Context, request tasks.PatchTasksIdRequestObject) (tasks.PatchTasksIdResponseObject, error) {
+
+	if request.Body == nil {
+		return nil, fmt.Errorf("request body is required")
+	}
+
+	id := uint(request.Id)
+
+	taskToUpdate := service.RequestBody{}
+
+	taskRequest := request.Body
+
+	if taskRequest.Task != nil {
+		taskToUpdate.Task = *taskRequest.Task
+	} else {
+		return nil, fmt.Errorf("field 'task' is required")
+	}
+
+	var isBool bool
+	if taskRequest.IsDone != nil {
+		isBool = *taskRequest.IsDone
+	}
+
+	updatedTask, err := h.service.UpdateTask(id, taskToUpdate, isBool)
+	if err != nil {
+		return nil, err
+	}
+
+	crTsk := int(updatedTask.ID)
+
+	response := tasks.PatchTasksId200JSONResponse{
+		Id:     &crTsk,
+		Task:   &updatedTask.Task,
+		IsDone: &updatedTask.IsDone,
+	}
+	return response, nil
+}
+
+// /
+// / COMPLETE THIS METHOD
+// /
+func (h *StatementHandler) DeleteTasksId(ctx context.Context, request tasks.DeleteTasksIdRequestObject) (tasks.DeleteTasksIdResponseObject, error) {
+	//TODO implement me
+	panic("implement me")
 }
 
 //func (h *StatementHandler) CreateHandler(w http.ResponseWriter, r *http.Request) {
@@ -114,63 +165,63 @@ func NewTaskHandler(s service.StatementService) *StatementHandler {
 //	}
 //}
 
-func (h *StatementHandler) UpdateHandler(w http.ResponseWriter, r *http.Request) {
-	strID := r.PathValue("id")
-
-	resID, err := strconv.Atoi(strID)
-	if err != nil {
-		http.Error(w, "invalid id format", http.StatusBadRequest)
-		return
-	}
-
-	id := uint(resID)
-
-	var rq struct {
-		Task   string `json:"task"`
-		IsDone bool   `json:"is_done"`
-	}
-
-	if err := json.NewDecoder(r.Body).Decode(&rq); err != nil {
-		http.Error(w, "Could not decode in the update", http.StatusBadRequest)
-		return
-	}
-
-	act, err := h.service.UpdateTask(id, rq.Task, rq.IsDone)
-	if err != nil {
-		http.Error(w, "Could not encode in the update", http.StatusInternalServerError)
-		return
-	}
-
-	fmt.Println("successful decode")
-	fmt.Println("json data update in the task variable")
-
-	w.Header().Set("Content-Type", "application/json")
-
-	if err := json.NewEncoder(w).Encode(act); err != nil {
-		http.Error(w, "Could not encode in the update", http.StatusNotFound)
-		return
-	}
-
-}
-
-func (h *StatementHandler) DeleteHandler(w http.ResponseWriter, r *http.Request) {
-	strID := r.PathValue("id")
-
-	resID, err := strconv.Atoi(strID)
-	if err != nil {
-		http.Error(w, "invalid id format", http.StatusBadRequest)
-		return
-	}
-
-	id := uint(resID)
-
-	err = h.service.DeleteTask(id)
-	if err != nil {
-		http.Error(w, "Could not encode in the update", http.StatusInternalServerError)
-		return
-	}
-	fmt.Println("successful decode in the delete")
-
-	w.WriteHeader(http.StatusNoContent)
-
-}
+//func (h *StatementHandler) UpdateHandler(w http.ResponseWriter, r *http.Request) {
+//	strID := r.PathValue("id")
+//
+//	resID, err := strconv.Atoi(strID)
+//	if err != nil {
+//		http.Error(w, "invalid id format", http.StatusBadRequest)
+//		return
+//	}
+//
+//	id := uint(resID)
+//
+//	var rq struct {
+//		Task   string `json:"task"`
+//		IsDone bool   `json:"is_done"`
+//	}
+//
+//	if err := json.NewDecoder(r.Body).Decode(&rq); err != nil {
+//		http.Error(w, "Could not decode in the update", http.StatusBadRequest)
+//		return
+//	}
+//
+//	act, err := h.service.UpdateTask(id, rq.Task, rq.IsDone)
+//	if err != nil {
+//		http.Error(w, "Could not encode in the update", http.StatusInternalServerError)
+//		return
+//	}
+//
+//	fmt.Println("successful decode")
+//	fmt.Println("json data update in the task variable")
+//
+//	w.Header().Set("Content-Type", "application/json")
+//
+//	if err := json.NewEncoder(w).Encode(act); err != nil {
+//		http.Error(w, "Could not encode in the update", http.StatusNotFound)
+//		return
+//	}
+//
+//}
+//
+//func (h *StatementHandler) DeleteHandler(w http.ResponseWriter, r *http.Request) {
+//	strID := r.PathValue("id")
+//
+//	resID, err := strconv.Atoi(strID)
+//	if err != nil {
+//		http.Error(w, "invalid id format", http.StatusBadRequest)
+//		return
+//	}
+//
+//	id := uint(resID)
+//
+//	err = h.service.DeleteTask(id)
+//	if err != nil {
+//		http.Error(w, "Could not encode in the update", http.StatusInternalServerError)
+//		return
+//	}
+//	fmt.Println("successful decode in the delete")
+//
+//	w.WriteHeader(http.StatusNoContent)
+//
+//}

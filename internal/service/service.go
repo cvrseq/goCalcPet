@@ -4,7 +4,7 @@ type StatementService interface {
 	CreateTask(task RequestBody) (RequestBody, error)
 	GetAllTasks() ([]RequestBody, error)
 	GetTaskById(id uint) (RequestBody, error)
-	UpdateTask(id uint, task string, isDone bool) (RequestBody, error)
+	UpdateTask(id uint, task RequestBody, isDone bool) (RequestBody, error)
 	DeleteTask(id uint) error
 }
 
@@ -32,16 +32,15 @@ func (s *TaskService) GetTaskById(id uint) (RequestBody, error) {
 	return s.repo.GetTaskById(id)
 }
 
-func (s *TaskService) UpdateTask(id uint, task string, isDone bool) (RequestBody, error) {
+func (s *TaskService) UpdateTask(id uint, task RequestBody, isDone bool) (RequestBody, error) {
 	act, err := s.repo.GetTaskById(id)
 	if err != nil {
 		return RequestBody{}, err
 	}
 
-	act.Task = task
 	act.IsDone = isDone
 
-	if err := s.repo.UpdateTask(act); err != nil {
+	if err := s.repo.UpdateTask(task); err != nil {
 		return RequestBody{}, err
 	}
 	return act, nil
