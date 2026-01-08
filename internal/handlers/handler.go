@@ -2,6 +2,8 @@ package handlers
 
 import (
 	"CRUD/internal/service"
+	"CRUD/internal/web/tasks"
+	"context"
 	"encoding/json"
 	"fmt"
 	"net/http"
@@ -12,53 +14,105 @@ type StatementHandler struct {
 	service service.StatementService
 }
 
+func (h *StatementHandler) GetTasks(ctx context.Context, request tasks.GetTasksRequestObject) (tasks.GetTasksResponseObject, error) {
+	allTasks, err := h.service.GetAllTasks()
+	if err != nil {
+		return nil, err
+	}
+
+	response := tasks.GetTasks200JSONResponse{}
+
+	for _, tsk := range allTasks {
+		task := tasks.Task{
+			Id:     &tsk.ID,
+			IsDone: &tsk.IsDone,
+			Task:   &tsk.Task,
+		}
+		response = append(response, task)
+	}
+
+	return response, nil
+}
+
+func (h *StatementHandler) PostTasks(ctx context.Context, request tasks.PostTasksRequestObject) (tasks.PostTasksResponseObject, error) {
+	if request.Body == nil {
+		return nil, fmt.Errorf("request body is required")
+	}
+	taskRequest := request.Body
+
+	taskToCreate := service.RequestBody{}
+
+	if taskRequest.Task != nil {
+		taskToCreate.Task = *taskRequest.Task
+	} else {
+		return nil, fmt.Errorf("field 'task' is required")
+	}
+
+	if taskRequest.IsDone != nil {
+		taskToCreate.IsDone = *taskRequest.IsDone
+	}
+
+	createdTask, err := h.service.CreateTask(taskToCreate)
+	if err != nil {
+		return nil, err
+	}
+
+	response := tasks.PostTasks201JSONResponse{
+		Id:     &createdTask.ID,
+		Task:   &createdTask.Task,
+		IsDone: &createdTask.IsDone,
+	}
+
+	return response, nil
+}
+
 func NewTaskHandler(s service.StatementService) *StatementHandler {
 	return &StatementHandler{service: s}
 }
 
-func (h *StatementHandler) CreateHandler(w http.ResponseWriter, r *http.Request) {
+//func (h *StatementHandler) CreateHandler(w http.ResponseWriter, r *http.Request) {
+//
+//	var task service.RequestBody
+//
+//	if err := json.NewDecoder(r.Body).Decode(&task); err != nil {
+//		http.Error(w, "Could not decode in the create", http.StatusBadRequest)
+//		return
+//	}
+//
+//	act, err := h.service.CreateTask(task.Task)
+//	if err != nil {
+//		http.Error(w, "Could not decode in the create", http.StatusInternalServerError)
+//		return
+//	}
+//
+//	fmt.Println("successful decode")
+//	fmt.Println("Trying create variable and write db...")
+//	fmt.Println("json data write in the task variable")
+//
+//	w.Header().Set("Content-Type", "application/json")
+//	w.WriteHeader(http.StatusCreated)
+//	if err := json.NewEncoder(w).Encode(act); err != nil {
+//		http.Error(w, "Could not decode in the create", http.StatusNotFound)
+//		return
+//	}
+//
+//}
 
-	var task service.RequestBody
-
-	if err := json.NewDecoder(r.Body).Decode(&task); err != nil {
-		http.Error(w, "Could not decode in the create", http.StatusBadRequest)
-		return
-	}
-
-	act, err := h.service.CreateTask(task.Task)
-	if err != nil {
-		http.Error(w, "Could not decode in the create", http.StatusInternalServerError)
-		return
-	}
-
-	fmt.Println("successful decode")
-	fmt.Println("Trying create variable and write db...")
-	fmt.Println("json data write in the task variable")
-
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(http.StatusCreated)
-	if err := json.NewEncoder(w).Encode(act); err != nil {
-		http.Error(w, "Could not decode in the create", http.StatusNotFound)
-		return
-	}
-
-}
-
-func (h *StatementHandler) GetHandlers(w http.ResponseWriter, r *http.Request) {
-	task, err := h.service.GetAllTasks()
-	if err != nil {
-		http.Error(w, "Could not find on db", http.StatusInternalServerError)
-		return
-	}
-
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(http.StatusOK)
-
-	if err := json.NewEncoder(w).Encode(task); err != nil {
-		http.Error(w, "Could not find on db", http.StatusNotFound)
-		return
-	}
-}
+//func (h *StatementHandler) GetHandlers(w http.ResponseWriter, r *http.Request) {
+//	task, err := h.service.GetAllTasks()
+//	if err != nil {
+//		http.Error(w, "Could not find on db", http.StatusInternalServerError)
+//		return
+//	}
+//
+//	w.Header().Set("Content-Type", "application/json")
+//	w.WriteHeader(http.StatusOK)
+//
+//	if err := json.NewEncoder(w).Encode(task); err != nil {
+//		http.Error(w, "Could not find on db", http.StatusNotFound)
+//		return
+//	}
+//}
 
 func (h *StatementHandler) UpdateHandler(w http.ResponseWriter, r *http.Request) {
 	strID := r.PathValue("id")

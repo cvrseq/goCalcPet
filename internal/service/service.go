@@ -1,7 +1,7 @@
 package service
 
 type StatementService interface {
-	CreateTask(task string) (RequestBody, error)
+	CreateTask(task RequestBody) (RequestBody, error)
 	GetAllTasks() ([]RequestBody, error)
 	GetTaskById(id uint) (RequestBody, error)
 	UpdateTask(id uint, task string, isDone bool) (RequestBody, error)
@@ -16,15 +16,12 @@ func NewTaskService(r StatementRepository) StatementService {
 	return &TaskService{repo: r}
 }
 
-func (s *TaskService) CreateTask(task string) (RequestBody, error) {
-	var act RequestBody
+func (s *TaskService) CreateTask(task RequestBody) (RequestBody, error) {
 
-	act.Task = task
-
-	if err := s.repo.CreateTask(&act); err != nil {
+	if err := s.repo.CreateTask(&task); err != nil {
 		return RequestBody{}, err
 	}
-	return act, nil
+	return task, nil
 }
 
 func (s *TaskService) GetAllTasks() ([]RequestBody, error) {
