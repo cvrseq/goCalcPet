@@ -39,8 +39,9 @@ func (s *TaskService) UpdateTask(id uint, task RequestBody, isDone bool) (Reques
 	}
 
 	act.IsDone = isDone
+	act.Task = task.Task
 
-	if err := s.repo.UpdateTask(task); err != nil {
+	if err := s.repo.UpdateTask(act); err != nil {
 		return RequestBody{}, err
 	}
 	return act, nil

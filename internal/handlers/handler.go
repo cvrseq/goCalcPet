@@ -117,8 +117,15 @@ func (h *StatementHandler) PatchTasksId(ctx context.Context, request tasks.Patch
 // / COMPLETE THIS METHOD
 // /
 func (h *StatementHandler) DeleteTasksId(ctx context.Context, request tasks.DeleteTasksIdRequestObject) (tasks.DeleteTasksIdResponseObject, error) {
-	//TODO implement me
-	panic("implement me")
+
+	id := uint(request.Id)
+
+	err := h.service.DeleteTask(id)
+	if err != nil {
+		return nil, err
+	}
+
+	return tasks.DeleteTasksId204Response{}, nil
 }
 
 //func (h *StatementHandler) CreateHandler(w http.ResponseWriter, r *http.Request) {
